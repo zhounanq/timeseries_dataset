@@ -1,0 +1,25 @@
+# yaml for parcel-based time-series dataset for deep learning
+
+# name for this config
+config_name:
+  'dijon'
+
+# parcel map in raster format (type for pixel values)
+parcel_raster:
+  ''
+
+# time-series raster images
+raster_list:
+  - 'K:\FF\application_dataset\2021-yongchuan\2mvc\L1C_T48RWT_2021032X_10m_yc.tif'
+
+# where to store dataset
+result_folder:
+  './result'
+
+# indicating no data values for time-series raster
+no_data_raster: 0
+# patch size
+patch_size: 32
+# min percentage for sample type in a patch
+min_pixel_percent: 0.01
+
