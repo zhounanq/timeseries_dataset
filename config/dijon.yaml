@@ -4,17 +4,22 @@
 config_name:
   'dijon'
 
-# parcel map in raster format (type for pixel values)
-parcel_raster:
-  ''
+# label raster map in raster format (type for pixel values)
+label_raster:
+  'H:\FF\application_dataset\2020-france-agri\parcel_dirong\polygon\parcel_dirong_maincrop_removesmall_utm_label.tif'
 
 # time-series raster images
 raster_list:
-  - 'K:\FF\application_dataset\2021-yongchuan\2mvc\L1C_T48RWT_2021032X_10m_yc.tif'
+  - 'H:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\10m\L1C_T31TFN_20190304_masked_10m.tif'
+  - 'H:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\10m\L1C_T31TFN_20190309_masked_10m.tif'
 
 # where to store dataset
 result_folder:
-  './result'
+  '.\result'
+
+# where to store temp data
+temp_folder:
+  '.\temp'
 
 # indicating no data values for time-series raster
 no_data_raster: 0
