@@ -47,6 +47,7 @@ def read_raster(raster_path, print_info=False):
     print(f'Array shape: {raster_array.shape}')
     if raster_array.ndim != 3:
         print('Only multi-spectral raster supported')
+        raster_array = raster_array[np.newaxis, :]
         sys.exit(1)
 
     # 3. return
@@ -95,6 +96,43 @@ def read_label_raster(label_raster):
     # 3. close
     del raster_ds
     return raster_array
+
+
+def write_raster_ref(raster_array, result_path, ref_path, format='GTiff'):
+    print('### Writing result image...')
+
+    #################################################################
+    # 1. open source data
+    ref_ds = gdal.Open(ref_path, gdal.GA_ReadOnly)
+    if not ref_ds:
+        print('Unable to open image {}'.format(ref_path))
+        sys.exit(1)
+    ref_proj = ref_ds.GetProjection()
+    ref_transform = ref_ds.GetGeoTransform()
+    ref_datatype = ref_ds.GetRasterBand(1).DataType
+    ref_shape = (ref_ds.RasterCount, ref_ds.RasterYSize, ref_ds.RasterXSize)
+
+    assert(ref_shape[0] == raster_array[0] and ref_shape[1] == raster_array[1])
+
+    #################################################################
+    # 3. write image
+    raster_driver = gdal.GetDriverByName(format)
+    raster_ds = raster_driver.Create(result_path, xsize=ref_shape[2], ysize=ref_shape[1], bands=ref_shape[0], eType=ref_datatype)
+    if not raster_ds:
+        print("Unable to create image {} with driver {}".format(result_path, format))
+        sys.exit(1)
+
+    raster_ds.SetGeoTransform(ref_transform)
+    raster_ds.SetProjection(ref_proj)
+    # dst_ds.GetRasterBand(1).SetNoDataValue(nodata_value)
+    raster_ds.WriteRaster(0, 0, ref_shape[2], ref_shape[1], raster_array.tobytes())
+
+    #################################################################
+    # 4. close
+    raster_ds.FlushCache()
+    del raster_ds, ref_ds
+
+    print("### Success @ write_raster_with_ref() ##################")
 
 
 def write_patch_sample(class_type, raster_data, target_path):

@@ -19,7 +19,7 @@ os.environ['PROJ_LIB'] = r'D:\develop-envi\anaconda3\envs\py38\Lib\site-packages
 gdal.UseExceptions()
 
 
-class TrainDatasetMem(object):
+class TSRasterDatasetMem(object):
 
     def __init__(self, label_path, raster_list, result_folder, patch_size=32, min_pixel_percent=0.01):
         self.label_raster_path = label_path
@@ -70,24 +70,9 @@ class TrainDatasetMem(object):
         src_rows, src_cols = label_data.shape
         patch_size = self.patch_size
 
-        if src_rows % patch_size > patch_size * 0.6:
-            self.pad_rows = int((src_rows // patch_size + 1) * patch_size)
-        else:
-            self.pad_rows = int((src_rows // patch_size) * patch_size)
-
-        if src_cols % patch_size > patch_size * 0.6:
-            self.pad_cols = int((src_cols // patch_size + 1) * patch_size)
-        else:
-            self.pad_cols = int((src_cols // patch_size) * patch_size)
-
-        pad_rows_num = (self.pad_rows - src_rows) if (self.pad_rows > src_rows) else 0
-        pad_cols_num = (self.pad_cols - src_cols) if (self.pad_cols > src_cols) else 0
-        raster_data = np.pad(raster_data, ((0, 0), (0, pad_rows_num), (0, pad_cols_num)), 'constant')
-        label_data = np.pad(label_data, ((0, pad_rows_num), (0, pad_cols_num)), 'constant')
-
         # for each grid
-        rows_grid = self.pad_rows // patch_size
-        cols_grid = self.pad_cols // patch_size
+        rows_grid = src_rows // patch_size
+        cols_grid = src_cols // patch_size
         for rr in range(rows_grid):
             row_start = rr * patch_size
             row_end = rr * patch_size + patch_size

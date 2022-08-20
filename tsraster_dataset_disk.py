@@ -11,7 +11,7 @@ import numpy as np
 import warnings
 from osgeo import gdal
 
-from raster_util import read_raster, read_raster_list, read_label_raster, write_patch_sample
+from raster_util import read_raster, read_label_raster, write_patch_sample
 from raster_util import load_numpy_array, write_numpy_array
 
 warnings.filterwarnings('ignore')
@@ -20,7 +20,7 @@ os.environ['PROJ_LIB'] = r'D:\develop-envi\anaconda3\envs\py38\Lib\site-packages
 gdal.UseExceptions()
 
 
-class TrainDatasetDisk(object):
+class TSRasterDatasetDisk(object):
 
     def __init__(self, label_path, raster_list, result_folder, patch_size=32, min_pixel_percent=0.01):
         self.label_raster_path = label_path
@@ -42,18 +42,8 @@ class TrainDatasetDisk(object):
         src_rows, src_cols = label_data.shape
         patch_size = self.patch_size
 
-        if src_rows % patch_size > patch_size*0.6:
-            self.pad_rows = int((src_rows // patch_size + 1) * patch_size)
-        else:
-            self.pad_rows = int((src_rows // patch_size) * patch_size)
-
-        if src_cols % patch_size > patch_size*0.6:
-            self.pad_cols = int((src_cols // patch_size + 1) * patch_size)
-        else:
-            self.pad_cols = int((src_cols // patch_size) * patch_size)
-
-        rows_patch = self.pad_rows // patch_size
-        cols_patch = self.pad_cols // patch_size
+        rows_patch = src_rows // patch_size
+        cols_patch = src_cols // patch_size
         self.grid_code = np.zeros((rows_patch*cols_patch, 4), dtype=np.int)
         for rr in range(rows_patch):
             row_start = rr * patch_size
@@ -79,9 +69,6 @@ class TrainDatasetDisk(object):
         # read and pad raster
         label_data = read_label_raster(self.label_raster_path)
         src_rows, src_cols = label_data.shape
-        pad_rows_num = (self.pad_rows - src_rows) if (self.pad_rows > src_rows) else 0
-        pad_cols_num = (self.pad_cols - src_cols) if (self.pad_cols > src_cols) else 0
-        label_data = np.pad(label_data, ((0, pad_rows_num), (0, pad_cols_num)), 'constant')
 
         # split raster and write
         num_grid = self.grid_code.shape[0]
@@ -110,9 +97,6 @@ class TrainDatasetDisk(object):
             # read and pad raster
             raster_data = read_raster(path)
             src_band, src_rows, src_cols = raster_data.shape
-            pad_rows_num = (self.pad_rows - src_rows) if (self.pad_rows > src_rows) else 0
-            pad_cols_num = (self.pad_cols - src_cols) if (self.pad_cols > src_cols) else 0
-            raster_data = np.pad(raster_data, ((0, 0), (0, pad_rows_num), (0, pad_cols_num)), 'constant')
 
             # split raster and write
             num_grid = self.grid_code.shape[0]
@@ -205,7 +189,7 @@ class TrainDatasetDisk(object):
         pass
 
     def generate(self):
-        assert(self.pad_rows > 0 and self.grid_code is not None)
+        assert(self.grid_code is not None)
 
         self._combine_label_raster_data()
         pass

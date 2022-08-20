@@ -10,7 +10,7 @@ import os, sys, time
 import argparse
 import yaml
 
-from train_dataset_disk import TrainDatasetDisk
+from train_dataset_disk import TSRasterDatasetDisk
 
 
 def parse_args():
@@ -54,7 +54,7 @@ def main():
 
     #######################################################
     # do
-    tdd = TrainDatasetDisk(label_raster, raster_list, result_folder, patch_size, min_pixel_percent)
+    tdd = TSRasterDatasetDisk(label_raster, raster_list, result_folder, patch_size, min_pixel_percent)
     tdd.prepare_data()
     tdd.generate()
 
