@@ -75,13 +75,13 @@ def read_raster_list(raster_list):
     return all_data
 
 
-def read_label_raster(label_raster):
-    print("### Reading label raster {}".format(label_raster))
+def read_label_data(label_path):
+    print("### Reading label raster {}".format(label_path))
 
     # 1. open source data
-    raster_ds = gdal.Open(label_raster, gdal.GA_ReadOnly)
+    raster_ds = gdal.Open(label_path, gdal.GA_ReadOnly)
     if not raster_ds:
-        print('Unable to open image {}'.format(label_raster))
+        print('Unable to open image {}'.format(label_path))
         sys.exit(1)
     print(f'Project: {raster_ds.GetProjection()}')
     print(f'GeoTransform: {raster_ds.GetGeoTransform()}')

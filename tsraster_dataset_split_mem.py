@@ -11,7 +11,7 @@ import numpy as np
 import warnings
 from osgeo import gdal
 
-from raster_util import read_raster_list, read_label_raster, write_patch_sample
+from raster_util import read_raster_list, read_label_data, write_patch_sample
 
 warnings.filterwarnings('ignore')
 os.environ['CPL_ZIP_ENCODING'] = 'UTF-8'
@@ -19,10 +19,10 @@ os.environ['PROJ_LIB'] = r'D:\develop-envi\anaconda3\envs\py38\Lib\site-packages
 gdal.UseExceptions()
 
 
-class TSRasterDatasetMem(object):
+class TSRasterDatasetSplitMem(object):
 
     def __init__(self, label_path, raster_list, result_folder, patch_size=32, min_pixel_percent=0.01):
-        self.label_raster_path = label_path
+        self.label_path = label_path
         self.raster_path_list = raster_list
         self.result_folder = result_folder
 
@@ -31,8 +31,6 @@ class TSRasterDatasetMem(object):
 
         self.patch_size = patch_size
         self.min_pixel_percent = min_pixel_percent
-
-        pass
 
     def _grid_to_sample(self, label_data, raster_data, grid_code):
         print(f'Slicing types for {grid_code} ...')
@@ -62,7 +60,7 @@ class TSRasterDatasetMem(object):
                 write_patch_sample(vv, raster_data_current, sample_path)
             # if
         # for
-        pass
+        return self.result_folder
 
     def _split_grid_raster(self, label_data, raster_data):
         print('### Spliting raster and label data into grids...')
@@ -92,10 +90,10 @@ class TSRasterDatasetMem(object):
         pass
 
     def prepare_data(self):
-        assert(os.path.exists(self.label_raster_path))
+        assert(os.path.exists(self.label_path))
         # todo check the list of raster
 
-        self.label_data = read_label_raster(self.label_raster_path)
+        self.label_data = read_label_data(self.label_path)
         self.raster_data = read_raster_list(self.raster_path_list)
         pass
 

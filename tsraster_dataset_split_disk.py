@@ -11,7 +11,7 @@ import numpy as np
 import warnings
 from osgeo import gdal
 
-from raster_util import read_raster, read_label_raster, write_patch_sample
+from raster_util import read_raster, read_label_data, write_patch_sample
 from raster_util import load_numpy_array, write_numpy_array
 
 warnings.filterwarnings('ignore')
@@ -20,10 +20,10 @@ os.environ['PROJ_LIB'] = r'D:\develop-envi\anaconda3\envs\py38\Lib\site-packages
 gdal.UseExceptions()
 
 
-class TSRasterDatasetDisk(object):
+class TSRasterDatasetSplitDisk(object):
 
     def __init__(self, label_path, raster_list, result_folder, patch_size=32, min_pixel_percent=0.01):
-        self.label_raster_path = label_path
+        self.label_path = label_path
         self.raster_path_list = raster_list
         self.result_folder = result_folder
 
@@ -33,12 +33,10 @@ class TSRasterDatasetDisk(object):
         self.patch_size = patch_size
         self.min_pixel_percent = min_pixel_percent
 
-        pass
-
     def _generate_grid_code(self):
         print("### Generating grid codes for study area...")
 
-        label_data = read_label_raster(self.label_raster_path)
+        label_data = read_label_data(self.label_path)
         src_rows, src_cols = label_data.shape
         patch_size = self.patch_size
 
@@ -56,18 +54,18 @@ class TSRasterDatasetDisk(object):
         # for
 
         print(f'{self.grid_code.shape[0]} patch searched')
-        pass
+        return self.grid_code
 
     def _split_label_data(self):
         print('### Split label data ...')
 
         # create folder for grid data
-        (grid_folder, ext) = os.path.splitext(self.label_raster_path)
+        (grid_folder, ext) = os.path.splitext(self.label_path)
         if not os.path.exists(grid_folder):
             os.makedirs(grid_folder)
 
         # read and pad raster
-        label_data = read_label_raster(self.label_raster_path)
+        label_data = read_label_data(self.label_path)
         src_rows, src_cols = label_data.shape
 
         # split raster and write
@@ -81,7 +79,7 @@ class TSRasterDatasetDisk(object):
             write_numpy_array(grid_label_data, grid_path)
         # for
 
-        pass
+        return grid_folder
 
     def _split_raster_data(self):
         print('### Split multi-temporal raster data ...')
@@ -111,7 +109,7 @@ class TSRasterDatasetDisk(object):
         # for
 
         print('### Split multi-temporal raster data complete!')
-        pass
+        return 0
 
     def _combine_label_raster_data(self):
         print('### Generating grid samples...')
@@ -121,7 +119,7 @@ class TSRasterDatasetDisk(object):
         for path in self.raster_path_list:
             (raster_grid_folder, ext) = os.path.splitext(path)
             raster_grid_folder_list.append(raster_grid_folder)
-        (label_grid_folder, ext) = os.path.splitext(self.label_raster_path)
+        (label_grid_folder, ext) = os.path.splitext(self.label_path)
 
         # combine grid data
         num_grid = self.grid_code.shape[0]
@@ -135,7 +133,6 @@ class TSRasterDatasetDisk(object):
                 raster_grid_path = os.path.join(folder, grid_name+'.npy')
                 raster_grid_data = load_numpy_array(raster_grid_path)
                 raster_grid_data_list.append(raster_grid_data)
-            # for
             all_raster_grid_data = np.concatenate(raster_grid_data_list, axis=0)
 
             label_grid_path = os.path.join(label_grid_folder, grid_name+'.npy')
@@ -145,7 +142,7 @@ class TSRasterDatasetDisk(object):
         # for
 
         print('### Generating grid samples complete!')
-        pass
+        return self.result_folder
 
     def _grid_to_sample(self, label_data, raster_data, grid_code):
         print(f'Slicing types for {grid_code} ...')
@@ -177,10 +174,10 @@ class TSRasterDatasetDisk(object):
                 write_patch_sample(vv, raster_data_current, sample_path)
             # if
         # for
-        pass
+        return self.result_folder
 
     def prepare_data(self):
-        assert(os.path.exists(self.label_raster_path))
+        assert(os.path.exists(self.label_path))
         # todo check the list of raster data
 
         self._generate_grid_code()
@@ -192,4 +189,5 @@ class TSRasterDatasetDisk(object):
         assert(self.grid_code is not None)
 
         self._combine_label_raster_data()
-        pass
+
+        return self.result_folder

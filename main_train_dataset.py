@@ -10,7 +10,7 @@ import os, sys, time
 import argparse
 import yaml
 
-from train_dataset_disk import TSRasterDatasetDisk
+from tsraster_dataset_split_disk import TSRasterDatasetSplitDisk
 
 
 def parse_args():
@@ -28,14 +28,14 @@ def configure_info(yaml_path):
         cfg = yaml.safe_load(f)
         print(cfg)
         config_name = cfg['config_name']
-        label_raster = cfg['label_raster']
+        label_path = cfg['label_path']
         raster_list = cfg['raster_list']
         result_folder = cfg['result_folder']
 
         patch_size = int(cfg['patch_size'])
         min_pixel_percent = float(cfg['min_pixel_percent'])
 
-    return config_name, label_raster, raster_list, result_folder, patch_size, min_pixel_percent
+    return config_name, label_path, raster_list, result_folder, patch_size, min_pixel_percent
 
 
 def main():
@@ -47,16 +47,15 @@ def main():
     # cmd line
     opts = parse_args()
     yaml_path = opts.config_path
-
     yaml_path = r'E:\develop_project\github-self\timeseries_dataset\config\dijon.yaml'
 
-    config_name, label_raster, raster_list, result_folder, patch_size, min_pixel_percent = configure_info(yaml_path)
+    config_name, label_path, raster_list, result_folder, patch_size, min_pixel_percent = configure_info(yaml_path)
 
     #######################################################
     # do
-    tdd = TSRasterDatasetDisk(label_raster, raster_list, result_folder, patch_size, min_pixel_percent)
-    tdd.prepare_data()
-    tdd.generate()
+    tdsd = TSRasterDatasetSplitDisk(label_path, raster_list, result_folder, patch_size, min_pixel_percent)
+    tdsd.prepare_data()
+    tdsd.generate()
 
     #######################################################
     # close

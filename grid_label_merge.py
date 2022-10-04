@@ -11,7 +11,7 @@ import numpy as np
 import warnings
 from osgeo import gdal
 
-from raster_util import read_raster, read_label_raster, write_raster_ref
+from raster_util import read_raster, read_label_data, write_raster_ref
 
 warnings.filterwarnings('ignore')
 os.environ['CPL_ZIP_ENCODING'] = 'UTF-8'
@@ -19,33 +19,33 @@ os.environ['PROJ_LIB'] = r'D:\develop-envi\anaconda3\envs\py38\Lib\site-packages
 gdal.UseExceptions()
 
 
-class ResultDataset(object):
+class GridLabelMerge(object):
 
-    def __init__(self, result_grid_folder, label_raster_path):
+    def __init__(self, grid_folder, label_path):
 
-        self.label_raster_path = label_raster_path
-        self.result_grid_folder = result_grid_folder
+        self.label_path = label_path
+        self.grid_folder = grid_folder
 
-        self.label_raster_data = None
+        self.label_data = None
         self.result_grid_list = []
 
         pass
 
     def _prepare_data(self):
 
-        for path in os.listdir(self.result_grid_folder):
+        for path in os.listdir(self.grid_folder):
             if os.path.isfile(path):
                 self.result_grid_list.append(path)
 
-        self.label_raster_data = read_label_raster(self.label_raster_path)
+        self.label_data = read_label_data(self.label_path)
 
         pass
 
     def _update_type_to_label(self, type, label, row_start, row_end, col_start, col_end):
 
-        grid_label = self.label_raster_data[row_start:row_end, col_start:col_end]
+        grid_label = self.label_data[row_start:row_end, col_start:col_end]
         grid_label[grid_label == label] = type
-        self.label_raster_data[row_start:row_end, col_start:col_end] = grid_label
+        self.label_data[row_start:row_end, col_start:col_end] = grid_label
 
         pass
 
@@ -69,5 +69,5 @@ class ResultDataset(object):
         if not os.path.exists(result_folder):
             os.makedirs(result_folder)
 
-        write_raster_ref(self.label_raster_data, result_path, self.label_raster_path)
-        pass
+        write_raster_ref(self.label_data, result_path, self.label_path)
+        return result_path
