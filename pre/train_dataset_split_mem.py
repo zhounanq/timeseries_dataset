@@ -19,7 +19,7 @@ os.environ['PROJ_LIB'] = r'D:\develop-envi\anaconda3\envs\py38\Lib\site-packages
 gdal.UseExceptions()
 
 
-class TSRasterDatasetSplitMem(object):
+class TrainDatasetSplitMem(object):
 
     def __init__(self, label_path, raster_list, result_folder, patch_size=32, min_pixel_percent=0.01):
         self.label_path = label_path

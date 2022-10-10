@@ -10,7 +10,7 @@ import os, sys, time
 import argparse
 import yaml
 
-from tsraster_dataset_split_disk import TSRasterDatasetSplitDisk
+from pre import TrainDatasetSplit
 
 
 def parse_args():
@@ -47,13 +47,14 @@ def main():
     # cmd line
     opts = parse_args()
     yaml_path = opts.config_path
-    yaml_path = r'E:\develop_project\github-self\timeseries_dataset\config\dijon.yaml'
+    yaml_path = r'E:\develop_project\github-self\timeseries_dataset\config\dijon_train.yaml'
 
     config_name, label_path, raster_list, result_folder, patch_size, min_pixel_percent = configure_info(yaml_path)
 
     #######################################################
     # do
-    tdsd = TSRasterDatasetSplitDisk(label_path, raster_list, result_folder, patch_size, min_pixel_percent)
+    tdsd = TrainDatasetSplit(label_path, raster_list, result_folder, patch_size, min_pixel_percent)
+    tdsd.generate_grid_code()
     tdsd.prepare_data()
     tdsd.generate()
 
