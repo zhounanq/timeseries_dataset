@@ -8,7 +8,9 @@ Date: 2021-09-16
 """
 import os, sys, time
 import numpy as np
+import numba as nb
 import warnings
+from tqdm import tqdm
 from osgeo import gdal
 
 from raster_util import read_raster, read_label_data, write_patch_sample
@@ -70,13 +72,22 @@ class TrainDatasetSplitDisk(object):
 
         # split raster and write
         num_grid = self.grid_code.shape[0]
-        for gg in range(num_grid):
+        for gg in tqdm(range(num_grid), desc=self.label_path):
+
+            if num_grid > 10000:
+                sub = gg // 10000
+                write_folder = os.path.join(grid_folder, '{:0>2d}'.format(sub))
+                if gg % 10000 == 0 and not os.path.exists(write_folder):
+                    os.makedirs(write_folder)
+            else:
+                write_folder = grid_folder
+
             r_s, r_e, c_s, c_e = self.grid_code[gg, :]
             grid_name = '{:0>5d}_{:0>5d}_{:0>5d}_{:0>5d}'.format(r_s, r_e, c_s, c_e)
-            grid_path = os.path.join(grid_folder, grid_name)
+            write_path = os.path.join(write_folder, grid_name)
 
             grid_label_data = label_data[r_s:r_e, c_s:c_e]
-            write_numpy_array(grid_label_data, grid_path)
+            write_numpy_array(grid_label_data, write_path)
         # for
 
         return grid_folder
@@ -98,13 +109,22 @@ class TrainDatasetSplitDisk(object):
 
             # split raster and write
             num_grid = self.grid_code.shape[0]
-            for gg in range(num_grid):
+            for gg in tqdm(range(num_grid), desc=path):
+
+                if num_grid > 10000:
+                    sub = gg // 10000
+                    write_folder = os.path.join(grid_folder, '{:0>2d}'.format(sub))
+                    if gg % 10000 == 0 and not os.path.exists(write_folder):
+                        os.makedirs(write_folder)
+                else:
+                    write_folder = grid_folder
+
                 r_s, r_e, c_s, c_e = self.grid_code[gg, :]
                 grid_name = '{:0>5d}_{:0>5d}_{:0>5d}_{:0>5d}'.format(r_s, r_e, c_s, c_e)
-                grid_path = os.path.join(grid_folder, grid_name)
+                write_path = os.path.join(write_folder, grid_name)
 
                 grid_raster_data = raster_data[:, r_s:r_e, c_s:c_e]
-                write_numpy_array(grid_raster_data, grid_path)
+                write_numpy_array(grid_raster_data, write_path)
             # for
         # for
 
@@ -113,6 +133,9 @@ class TrainDatasetSplitDisk(object):
 
     def _combine_label_raster_data(self):
         print('### Generating grid samples...')
+
+        combine_folder = os.path.join(self.result_folder, 'label_raster')
+        os.makedirs(combine_folder)
 
         # path for grid data
         raster_grid_folder_list = []
@@ -123,7 +146,16 @@ class TrainDatasetSplitDisk(object):
 
         # combine grid data
         num_grid = self.grid_code.shape[0]
-        for gg in range(num_grid):
+        for gg in tqdm(range(num_grid)):
+
+            if num_grid > 10000:
+                sub = gg // 10000
+                write_folder = os.path.join(combine_folder, '{:0>2d}'.format(sub))
+                if gg % 10000 == 0 and not os.path.exists(write_folder):
+                    os.makedirs(write_folder)
+            else:
+                write_folder = combine_folder
+
             r_s, r_e, c_s, c_e = self.grid_code[gg, :]
             grid_name = '{:0>5d}_{:0>5d}_{:0>5d}_{:0>5d}'.format(r_s, r_e, c_s, c_e)
             print(f'Grid {grid_name}')
@@ -131,23 +163,23 @@ class TrainDatasetSplitDisk(object):
             # load raster data
             raster_grid_data_list = []
             for folder in raster_grid_folder_list:
-                raster_grid_path = os.path.join(folder, grid_name+'.npy')
+                raster_grid_path = os.path.join(folder, grid_name + '.npy')
                 raster_grid_data = load_numpy_array(raster_grid_path)
                 raster_grid_data_list.append(raster_grid_data)
             all_raster_grid_data = np.concatenate(raster_grid_data_list, axis=0)
 
             # load label data
-            label_grid_path = os.path.join(label_grid_folder, grid_name+'.npy')
+            label_grid_path = os.path.join(label_grid_folder, grid_name + '.npy')
             label_grid_data = load_numpy_array(label_grid_path)
 
             # write sample data
-            self._slice_sample(label_grid_data, all_raster_grid_data, grid_name)
+            self._slice_sample(label_grid_data, all_raster_grid_data, grid_name, write_folder)
         # for
 
         print('### Generating grid samples complete!')
         return self.result_folder
 
-    def _slice_sample(self, label_data, raster_data, grid_code):
+    def _slice_sample(self, label_data, raster_data, grid_code, folder):
         print(f'Slicing types for {grid_code} ...')
 
         patch_size2 = label_data.size
@@ -159,9 +191,10 @@ class TrainDatasetSplitDisk(object):
 
         # 2. for each type in parcel_data
         for vv, num in zip(unique, counts):
+
             if (vv != 0) and (num / patch_size2 > min_pixel_percent):
 
-                sample_path = os.path.join(self.result_folder, 'npy', '{:0>2d}_{}'.format(vv, grid_code))
+                sample_path = os.path.join(folder, '{:0>2d}_{}'.format(vv, grid_code))
                 print(f'generating sample on {sample_path}')
                 label_data_current = label_data.copy()
                 raster_data_current = raster_data.copy()
@@ -177,14 +210,14 @@ class TrainDatasetSplitDisk(object):
                 write_patch_sample(vv, raster_data_current, sample_path)
             # if
         # for
-        return self.result_folder
+        return folder
 
     def prepare_data(self):
         assert(os.path.exists(self.label_path))
         # todo check the list of raster data
 
         self._split_label_data()
-        self._split_raster_data()
+        # self._split_raster_data()
         pass
 
     def generate(self):

@@ -56,7 +56,7 @@ def main():
     tdsd = TrainDatasetSplit(label_path, raster_list, result_folder, patch_size, min_pixel_percent)
     tdsd.generate_grid_code()
     tdsd.prepare_data()
-    tdsd.generate()
+    # tdsd.generate()
 
     #######################################################
     # close

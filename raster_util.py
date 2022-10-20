@@ -8,6 +8,7 @@ Date: 2021-09-16
 """
 import os, sys, time
 import numpy as np
+import matplotlib.pyplot as plt
 import warnings
 
 from osgeo import gdal
@@ -19,6 +20,12 @@ gdal.UseExceptions()
 
 
 def read_raster(raster_path, print_info=False):
+    """
+
+    :param raster_path:
+    :param print_info:
+    :return: ndarry
+    """
     print("### Reading raster image {}".format(raster_path))
 
     # 1. open source data
@@ -47,10 +54,11 @@ def read_raster(raster_path, print_info=False):
     print(f'Array shape: {raster_array.shape}')
     if raster_array.ndim != 3:
         print('Only multi-spectral raster supported')
-        raster_array = raster_array[np.newaxis, :]
+        # raster_array = raster_array[np.newaxis, :]
         sys.exit(1)
 
     # 3. return
+    raster_ds = None
     return raster_array
 
 
@@ -94,7 +102,7 @@ def read_label_data(label_path):
     raster_array[raster_array == no_data] = 0
 
     # 3. close
-    del raster_ds
+    raster_ds = None
     return raster_array
 
 
