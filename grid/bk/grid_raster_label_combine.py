@@ -32,16 +32,22 @@ class GridRasterLabelCombine(object):
 
         self.grid_code_list = []
 
-    def list_folder_grid_codes(self, filter_ext='.tif'):
+    def list_folder_grid_codes(self, filter_ext='.npy'):
 
+        # fast version
         item_list = os.listdir(self.label_folder)
         for path in item_list:
-            abs_path = os.path.join(self.label_folder, path)
-            name, ext = os.path.splitext(path)
-            if os.path.isfile(abs_path) and (ext == filter_ext):
-                # print(path)
-                self.grid_code_list.append(path)
+            self.grid_code_list.append(path[:-4])
         self.grid_code_list.sort()
+
+        # item_list = os.listdir(self.label_folder)
+        # for path in item_list:
+        #     abs_path = os.path.join(self.label_folder, path)
+        #     name, ext = os.path.splitext(path)
+        #     if os.path.isfile(abs_path) and (ext == filter_ext):
+        #         # print(path)
+        #         self.grid_code_list.append(path)
+        # self.grid_code_list.sort()
 
         return self.grid_code_list
 

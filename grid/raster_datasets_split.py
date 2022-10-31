@@ -67,7 +67,7 @@ class RasterDatasetsSplit(object):
 
     def split_grid_raster(self):
         print('### Splitting raster data into grids...')
-        assert self.raster_data
+        # assert not self.raster_data.any()
 
         # create folder for grid data
         if not os.path.exists(self.result_folder):
@@ -107,11 +107,14 @@ def main():
     #######################################################
     # cmd line
     patch_size = 32
-    result_folder = r''
+    result_folder = r'K:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\25_30'
     raster_list = [
-        r'',
-        r'',
-
+        r'k:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\20m_10m\L1C_T31TFN_20190702_masked_10m.tif',
+        r'k:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\20m_10m\L1C_T31TFN_20190707_masked_10m.tif',
+        r'k:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\20m_10m\L1C_T31TFN_20190712_masked_10m.tif',
+        r'k:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\20m_10m\L1C_T31TFN_20190717_masked_10m.tif',
+        r'k:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\20m_10m\L1C_T31TFN_20190722_masked_10m.tif',
+        r'k:\FF\application_dataset\2020-france-agri\s2_l2a_tif_masked\20m_10m\L1C_T31TFN_20190727_masked_10m.tif'
     ]
 
     #######################################################

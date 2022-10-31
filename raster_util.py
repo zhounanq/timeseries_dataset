@@ -7,6 +7,7 @@ Author: Zhou Ya'nan
 Date: 2021-09-16
 """
 import os, sys, time
+import gc
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
@@ -62,7 +63,7 @@ def read_raster(raster_path, print_info=False):
     return raster_array
 
 
-def read_raster_list(raster_list):
+def read_raster_list1(raster_list):
     print("### Reading reference raster {}".format(raster_list))
 
     raster_data_list = []
@@ -70,15 +71,34 @@ def read_raster_list(raster_list):
     for rr in range(num_reference):
         path = raster_list[rr]
         raster_data = read_raster(path, (True if rr == 0 else False))
-
         if rr == 0:
             num_band = raster_data.shape[0]
         else:
             assert (num_band == raster_data.shape[0])
-
         raster_data_list.append(raster_data)
     # for
     all_data = np.concatenate(raster_data_list, axis=0)
+
+    return all_data
+
+
+def read_raster_list(raster_list):
+    print("### Reading reference raster {}".format(raster_list))
+
+    all_data = None
+    num_reference = len(raster_list)
+    for rr in range(num_reference):
+        path = raster_list[rr]
+        raster_data = read_raster(path, (True if rr == 0 else False))
+        if rr == 0:
+            num_band = raster_data.shape[0]
+            all_data = np.concatenate([raster_data], axis=0)
+        else:
+            assert (num_band == raster_data.shape[0])
+            all_data = np.concatenate([all_data, raster_data], axis=0)
+        del raster_data
+        gc.collect()
+    # for
 
     return all_data
 
@@ -143,7 +163,7 @@ def write_raster_ref(raster_array, result_path, ref_path, format='GTiff'):
     print("### Success @ write_raster_with_ref() ##################")
 
 
-def write_patch_sample(class_type, raster_data, target_path):
+def write_slice_array(class_type, raster_data, target_path):
     print(f'Saving for type {class_type} on {target_path}')
 
     parent_dir = os.path.dirname(target_path)
@@ -156,9 +176,9 @@ def write_patch_sample(class_type, raster_data, target_path):
 
 def write_numpy_array(numpy_array, target_path):
 
-    parent_dir = os.path.dirname(target_path)
-    if not os.path.exists(parent_dir):
-        os.makedirs(parent_dir)
+    # parent_dir = os.path.dirname(target_path)
+    # if not os.path.exists(parent_dir):
+    #     os.makedirs(parent_dir)
 
     np.save(target_path, numpy_array)
     pass

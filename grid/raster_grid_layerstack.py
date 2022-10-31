@@ -30,24 +30,30 @@ class RasterGridLayerStack(object):
 
         self.grid_code_list = []
 
-    def list_folder_grid_codes(self, filter_ext='.tif'):
+    def list_folder_grid_codes(self, filter_ext='.npy'):
 
         folder = self.raster_folder_list[0]
 
+        # fast version
         item_list = os.listdir(folder)
         for path in item_list:
-            abs_path = os.path.join(folder, path)
-            name, ext = os.path.splitext(path)
-            if os.path.isfile(abs_path) and (ext == filter_ext):
-                # print(path)
-                self.grid_code_list.append(path)
+            self.grid_code_list.append(path[:-4])
         self.grid_code_list.sort()
+
+        # item_list = os.listdir(folder)
+        # for path in item_list:
+        #     abs_path = os.path.join(folder, path)
+        #     name, ext = os.path.splitext(path)
+        #     if os.path.isfile(abs_path) and (ext == filter_ext):
+        #         # print(path)
+        #         self.grid_code_list.append(name)
+        # self.grid_code_list.sort()
 
         return self.grid_code_list
 
     @staticmethod
     def _warp_raster_grid_data(grid_array, target_size):
-        grid_row, grid_col = grid_array.shape[0], grid_array.shape[1]
+        grid_row, grid_col = grid_array.shape[1], grid_array.shape[2]
         assert(grid_row == grid_col)
         assert(target_size % grid_row == 0)
 
@@ -60,8 +66,10 @@ class RasterGridLayerStack(object):
     def layerstack_raster_data(self):
         print('### Layer-stacking grid samples...')
 
-        combine_folder = os.path.join(self.result_folder, 'raster')
-        os.makedirs(combine_folder)
+        first_folder = os.path.basename(self.raster_folder_list[0])
+        combine_folder = os.path.join(self.result_folder, first_folder)
+        if not os.path.exists(combine_folder):
+            os.makedirs(combine_folder)
 
         # combine grid data
         num_grid = len(self.grid_code_list)
@@ -103,10 +111,16 @@ def main():
     #######################################################
     # cmd line
     patch_size = 32
-    result_folder = r''
+    result_folder = r'K:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\01_48'
     raster_folder_list = [
-        r'',
-        r'',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\01_06\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\07_12\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\13_18\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\19_24\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\25_30\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\31_36\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\37_42\08',
+        r'k:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\grid_20m_10m_32\43_48\08'
     ]
 
     #######################################################
