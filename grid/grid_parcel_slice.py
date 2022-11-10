@@ -22,6 +22,12 @@ gdal.UseExceptions()
 
 
 class GridParcelSlice(object):
+    """
+    对地块栅格数据切片，按照地块ID不同，进行分层。
+    输入：32*32大小的切片，可能含有多个地块的像元；
+    处理：根据像元ID不同，生成每个ID对应的切片，该切片中仅保留该ID像元的值，其余像元值=0；
+    输出：多个32*32切片，每个切片只有一种像元值。
+    """
     def __init__(self, parcel_folder, result_folder, patch_size=32, min_pixel_percent=0.01):
         self.parcel_folder = parcel_folder
         self.result_folder = result_folder
@@ -32,7 +38,11 @@ class GridParcelSlice(object):
         self.grid_code_list = []
 
     def list_grid_codes(self, filter_ext='.npy'):
+        """
 
+        :param filter_ext:
+        :return:
+        """
         # fast version
         item_list = os.listdir(self.parcel_folder)
         for path in item_list:
@@ -44,7 +54,6 @@ class GridParcelSlice(object):
         #     abs_path = os.path.join(self.label_folder, path)
         #     name, ext = os.path.splitext(path)
         #     if os.path.isfile(abs_path) and (ext == filter_ext):
-        #         # print(path)
         #         self.grid_code_list.append(path)
         # self.grid_code_list.sort()
 
@@ -52,6 +61,14 @@ class GridParcelSlice(object):
 
     @staticmethod
     def _slice_parcel(parcel_data, min_pixel_percent, grid_code, folder):
+        """
+        对切片进行分层
+        :param parcel_data: 输入切片数据
+        :param min_pixel_percent: 类别的最小像元个数比例
+        :param grid_code: 切片编码
+        :param folder: 输出目录
+        :return:
+        """
         print(f'Slicing types for {grid_code} ...')
         patch_size2 = parcel_data.size
 
@@ -60,17 +77,16 @@ class GridParcelSlice(object):
 
         # 2. for each type in parcel_data
         for vv, num in zip(unique, counts):
-
+            # check not background pixels, and percent of target pixel is enough
             if (vv != 0) and (num / patch_size2 > min_pixel_percent):
-
+                # path for the slice of this grid
                 slice_path = os.path.join(folder, '00_{:0>8d}_{}'.format(vv, grid_code))
                 print(f'generating sample on {slice_path}')
+                # make a data copy.
                 parcel_data_current = parcel_data.copy()
-
                 # mask non-target values
                 label_mask = parcel_data_current != vv
                 parcel_data_current[label_mask] = 0
-
                 # save to disk
                 write_slice_array(vv, parcel_data_current, slice_path)
             # if
@@ -78,8 +94,13 @@ class GridParcelSlice(object):
         return grid_code
 
     def slice_parcel_grid(self):
+        """
+
+        :return:
+        """
         print('### Slicing grid by parcels...')
 
+        # make result folder
         combine_folder = os.path.join(self.result_folder, 'parcel_slice')
         if not os.path.exists(combine_folder):
             os.makedirs(combine_folder)
@@ -89,7 +110,7 @@ class GridParcelSlice(object):
         for gg, code in tqdm(enumerate(self.grid_code_list)):
             print(f'Grid {code}')
 
-            # target folder
+            # target folder for too many grid.
             if num_grid > 10000:
                 sub = gg // 10000
                 write_folder = os.path.join(combine_folder, '{:0>2d}'.format(sub))

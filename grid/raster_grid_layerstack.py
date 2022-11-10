@@ -22,6 +22,10 @@ gdal.UseExceptions()
 
 
 class RasterGridLayerStack(object):
+    """
+    栅格切片堆叠。
+    在栅格数据集合切片程序中，由于内存限制而不能一次性对所有栅格集合切片，考虑将其分为多个子集合分别切片，进而合并多个切片。
+    """
     def __init__(self, raster_folder_list, result_folder, patch_size=32):
 
         self.raster_folder_list = raster_folder_list
@@ -31,7 +35,11 @@ class RasterGridLayerStack(object):
         self.grid_code_list = []
 
     def list_folder_grid_codes(self, filter_ext='.npy'):
-
+        """
+        根据第一个栅格切片集合，生成切片编码。
+        :param filter_ext:
+        :return:
+        """
         folder = self.raster_folder_list[0]
 
         # fast version
@@ -45,7 +53,6 @@ class RasterGridLayerStack(object):
         #     abs_path = os.path.join(folder, path)
         #     name, ext = os.path.splitext(path)
         #     if os.path.isfile(abs_path) and (ext == filter_ext):
-        #         # print(path)
         #         self.grid_code_list.append(name)
         # self.grid_code_list.sort()
 
@@ -53,6 +60,12 @@ class RasterGridLayerStack(object):
 
     @staticmethod
     def _warp_raster_grid_data(grid_array, target_size):
+        """
+        对要堆叠的数据进行包装处理，比如数据类型、空间插值等。
+        :param grid_array:
+        :param target_size:
+        :return:
+        """
         grid_row, grid_col = grid_array.shape[1], grid_array.shape[2]
         assert(grid_row == grid_col)
         assert(target_size % grid_row == 0)
@@ -64,6 +77,10 @@ class RasterGridLayerStack(object):
         return grid_array.astype(np.float32)
 
     def layerstack_raster_data(self):
+        """
+        切片堆叠。
+        :return:
+        """
         print('### Layer-stacking grid samples...')
 
         first_folder = os.path.basename(self.raster_folder_list[0])

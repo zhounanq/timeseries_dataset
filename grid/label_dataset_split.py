@@ -22,9 +22,12 @@ gdal.UseExceptions()
 
 
 class LabelDatasetSplit(object):
+    """
+    对标记栅格进行空间划分。标记栅格可以是面样本栅格数据，也可以是地块栅格数据。
+    """
     def __init__(self, label_path, result_folder, patch_size=32):
         """
-
+        初始化。
         :param label_path:
         :param result_folder:
         :param patch_size:

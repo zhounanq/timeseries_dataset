@@ -19,7 +19,7 @@ gdal.SetConfigOption("SHAPE_ENCODING", "UTF-8")
 
 def add_field_rasterize(polygon_path, field_name='RSTIZE_ID'):
     """
-
+    为输入矢量，添加序列ID，ID从1开始。
     :param polygon_path:
     :param field_name:
     :return:

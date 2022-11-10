@@ -117,10 +117,10 @@ def main():
 
     #######################################################
     # cmd line
-    min_pixel_percent = 0.01
+    min_pixel_percent = 0.1
     patch_size = 32
-    result_folder = r'K:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\slice_label_32'
-    label_folder = r'K:\FF\application_dataset\2020-france-agri-grid\parcel_dirong\polygon_rasterize\parcel_dirong_label40'
+    result_folder = r'I:\FF\application_dataset\2020-france-agri-grid\s2_l2a_tif_masked\slice_label_32_10'
+    label_folder = r'I:\FF\application_dataset\2020-france-agri-grid\parcel_dirong\polygon_rasterize\parcel_dirong_label40'
 
     #######################################################
     # do

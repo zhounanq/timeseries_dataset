@@ -22,12 +22,16 @@ gdal.UseExceptions()
 
 
 class RasterDatasetsSplit(object):
+    """
+    栅格数据空间划分。（不重叠，不留空）
+    将输入的栅格数据集，按照指定的分块大小，空间划分，并保存到指定目录。
+    """
     def __init__(self, raster_list, result_folder, patch_size=32):
         """
-
-        :param raster_list:
-        :param result_folder:
-        :param patch_size:
+        初始化
+        :param raster_list: 栅格数据列表
+        :param result_folder: 结果数据目录
+        :param patch_size: 分片大小
         """
         self.raster_path_list = raster_list
         self.result_folder = result_folder
@@ -39,6 +43,10 @@ class RasterDatasetsSplit(object):
         self.patch_size = patch_size
 
     def prepare_data(self):
+        """
+        读入栅格数据
+        :return:
+        """
         # todo check the list of raster
 
         self.raster_data = read_raster_list(self.raster_path_list)
@@ -46,6 +54,10 @@ class RasterDatasetsSplit(object):
         self.raster_cols = self.raster_data.shape[2]
 
     def generate_grid_code(self):
+        """
+        根据栅格数据大小，生成分块编码。编码记录[起始行，终止行，起始列，终止列]
+        :return:
+        """
         print("### Generating grid codes for study area...")
         assert (self.raster_rows > 0 and self.raster_cols > 0)
 
@@ -66,6 +78,10 @@ class RasterDatasetsSplit(object):
         return self.grid_code
 
     def split_grid_raster(self):
+        """
+        空间划分。
+        :return:
+        """
         print('### Splitting raster data into grids...')
         # assert not self.raster_data.any()
 
